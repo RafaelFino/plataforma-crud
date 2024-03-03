@@ -1,90 +1,95 @@
+import logging
 import sqlite3
-from models import ProductModel
+from models.product import ProductModel
 
 class ProductStorage:
     def __init__(self, path: str):
-        self.conn = sqlite3.connect(path)
+        self.conn = sqlite3.connect(path, check_same_thread=False)
         self.create()
 
     def create(self):
-        create = f"CREATE TABLE IF NOT EXISTS Products (
-            id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, 
-            name TEXT NOT NULL,
-            desc TEXT DEFAULT NULL,
-            price REAL DEFAULT 0,
-            inserted_at TIMESTAMP DEFAULT DATETIME('now'),
-            updated_at TIMESTAMP DEFAULT DATETIME('now')
-        )"
-        cur = self.conn.cursor()
-        cur.execute(create)
+        if self.conn is None:
+            logging.error(f"[PRODUCT-STORAGE] Connection error!")
+
+        create = f"""
+CREATE TABLE IF NOT EXISTS Products (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, 
+    name TEXT NOT NULL,
+    desc TEXT DEFAULT NULL,
+    price REAL DEFAULT 0
+);
+        """
+        try:
+            cur = self.conn.cursor()
+            cur.execute(create)
+        except Exception as error: 
+            logging.error(f"[PRODUCT-STORAGE] Fail to create table: {error}")      
+            raise error     
 
     def insert(self, product: ProductModel) -> int:
-        insert = f"INSERT INTO Products (name, desc, price) 
-        VALUES 
-        (?, ?, ?)"
+        insert = f"""
+INSERT INTO Products (name, desc, price) 
+VALUES 
+(?, ?, ?)
+        """
 
+          
         cur = self.conn.cursor()
-        result = cur.execute(insert, product.Name, product.Desc, product.Price)
-        return result.lastrowid
+        result = cur.execute(insert, (product.Name, product.Desc, product.Price) )
+
+        id = result.lastrowid
+        product.setId(id)
+        logging.debug(f"[PRODUCT-STORAGE] Product created: {product.toJson()}")
+        return id
     
     def get(self) -> list:
-        query = f"
-        SELECT
-            id,
-            name,
-            desc,
-            price,
-            inserted_at,
-            updated_at
-        FROM
-            Products
-        ORDER BY
-            id, 
-            updated_at
-        "
+        query = f"""
+SELECT
+    id,
+    name,
+    desc,
+    price
+FROM
+    Products
+ORDER BY
+    id
+        """
 
         cur = self.conn.cursor()
 
         ret = []
 
         for row in cur.execute(query):
-            p = ProductModel(row['name'], row['desc'], row['price'])
-            p.setId(row['id'])
-            p.setInsertedAt = row['inserted_at']
-            p.setUpdatedAt = row['updated_at']
+            p = ProductModel(row[1], row[2], float(row[3]))
+            p.setId(int(row[0]))
 
             ret.append(p)
 
         return ret
     
-    def getByID(self, id: int) -> ProductModel:
-        query = f"
-        SELECT
-            id,
-            name,
-            desc,
-            price,
-            inserted_at,
-            updated_at
-        FROM
-            Products
-        WHERE
-            id = ? 
-        ORDER BY
-            id, 
-            updated_at
-        "
+    def getById(self, id: int) -> ProductModel:
+        query = f"""
+SELECT
+    id,
+    name,
+    desc,
+    price
+FROM
+    Products
+WHERE
+    id = ? 
+ORDER BY
+    id
+        """
 
         cur = self.conn.cursor()
-        result = cur.execute(query, id)
+        result = cur.execute(query, (id) )
         row = result.fetchone()
 
         if row is None:
             return None
 
-        p = ProductModel(row['name'], row['desc'], row['price'])
-        p.setId(row['id'])
-        p.setInsertedAt = row['inserted_at']
-        p.setUpdatedAt = row['updated_at']
+        p = ProductModel(row[1], row[2], float(row[3]))
+        p.setId(int(row[0]))
 
         return p

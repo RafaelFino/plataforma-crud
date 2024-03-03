@@ -1,25 +1,43 @@
 import logging
+import traceback
 
-from storage import ProductStorage
-from models import ProductModel
+from storage.product import ProductStorage
+from models.product import ProductModel
 
 class ProductService:
     def __init__(self):
         self.db = ProductStorage("products.db")
 
     def insert(self, prod:ProductModel) -> int:
-        id = self.db.insert(prod)
-        prod.setId(id)
-        logging.debug(f"[PRODUCT-SERVICE] Product inserted: {prod.toJson()}")
+        try:
+            id = self.db.insert(prod)
+            prod.setId(id)
+            logging.debug(f"[PRODUCT-SERVICE] Product created: {prod.toJson()}")
+        except Exception as error:
+            logging.error(f"[PRODUCT-SERVICE] Fail: {error} -> {traceback.format_exc()}")
 
+        return id
+            
     def get(self) -> list:
-        ret = self.db.get()
-        logging.debug(f"[PRODUCT-SERVICE] Get all products: {len(ret)} products")
+        try:
+            ret = self.db.get()
+            if ret is not None:
+                logging.debug(f"[PRODUCT-SERVICE] Get all products: {len(ret)} products")
+                return ret
+        
+        except Exception as error:
+            logging.error(f"[PRODUCT-SERVICE] Fail: {error} -> {traceback.format_exc()}")
+        
+        return None
 
-        return ret
-    
     def getById(self, id:int) -> ProductModel:
-        ret = self.getById(id)
-        logging.debug(f"[PRODUCT-SERVICE] Get Product: {ret.toJson()}")
+        try:
+            ret = self.db.getById(id)
+            if ret is not None:
+                logging.debug(f"[PRODUCT-SERVICE] Get Product: {ret.toJson()}")
 
-        return ret
+            return ret
+        except Exception as error:
+            logging.error(f"[PRODUCT-SERVICE] Fail: {error} -> {traceback.format_exc()}")
+
+        return None

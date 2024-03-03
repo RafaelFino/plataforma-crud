@@ -1,4 +1,3 @@
-from datetime import datetime
 import json 
 
 class ProductModel:
@@ -6,17 +5,22 @@ class ProductModel:
         self.Name = name
         self.Desc = desc
         self.Price = price
-        self.UpdatedAt = datetime.now()
-        self.InsertedAt = datetime.now()
+        self.Id = None
 
     def setId(self, id: int):
         self.Id = id
 
-    def setInsertedAt(self, when: datetime):
-        self.InsertedAt = when
+    def toDict(self):
+        data = { 
+            "name": self.Name, 
+            "desc": self.Desc, 
+            "price": self.Price 
+        }
 
-    def setUpdatedAt(self, when: datetime):
-        self.UpdatedAt = when
+        if self.Id is not None:
+            data["id"] = self.Id
+
+        return data
 
     def toJson(self) -> str:
-        return json.dumps(self, indent=4)
+        return json.dumps(self.toDict())
