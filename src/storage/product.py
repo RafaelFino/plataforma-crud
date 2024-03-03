@@ -36,6 +36,7 @@ VALUES
           
         cur = self.conn.cursor()
         result = cur.execute(insert, (product.Name, product.Desc, product.Price) )
+        self.conn.commit()
 
         id = result.lastrowid
         product.setId(id)
