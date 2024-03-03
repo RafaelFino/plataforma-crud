@@ -57,6 +57,19 @@ def get():
 
         return makeResponse("List all products", { "data": data, 'count': len(ret) }), HTTPStatus.OK
     except Exception as error: 
-        errorMsg = f"[PRODUCT-API] Error to try get products: {error}"
-        logging.error(errorMsg)
+        errorMsg = f"Error to try get all products: {error}"
+        logging.error(f"[PRODUCT-API] {errorMsg}")
         return makeResponse(errorMsg), HTTPStatus.INTERNAL_SERVER_ERROR        
+
+@app.route("/products/<id>", methods = ['GET'])
+def get(id):
+    try:
+        ret = service.getById(id)
+        if ret is None:
+            return makeResponse(f"Load product from id {id}", { 'id': id }), HTTPStatus.NOT_FOUND
+
+        return makeResponse(f"Load product from id {id}", { "data": ret.toJson() }), HTTPStatus.OK
+    except Exception as error: 
+        errorMsg = f"Error to try get product id {id}: {error}"
+        logging.error(f"[PRODUCT-API] {errorMsg}")
+        return makeResponse(errorMsg), HTTPStatus.INTERNAL_SERVER_ERROR       
