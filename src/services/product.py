@@ -6,7 +6,7 @@ from models.product import ProductModel
 
 class ProductService:
     def __init__(self):
-        self.db = ProductStorage("products.db")
+        self.db = ProductStorage("products.sqlite")
 
     def insert(self, prod:ProductModel) -> int:
         try:

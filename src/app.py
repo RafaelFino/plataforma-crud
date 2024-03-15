@@ -1,3 +1,5 @@
+#!/bin/env python3
+
 import logging
 from flask import Flask, request, jsonify
 from http import HTTPStatus
@@ -6,6 +8,8 @@ import json
 
 from models.product import ProductModel
 from services.product import ProductService
+
+print("Starting...")
 
 app = Flask(__name__)
 service = ProductService()
@@ -84,3 +88,5 @@ def getById(id):
         errorMsg = f"Error to try get product id {id}: {error}"
         logging.error(f"[PRODUCT-API] {errorMsg}")
         return makeResponse(errorMsg), HTTPStatus.INTERNAL_SERVER_ERROR       
+
+print("Exiting...")
