@@ -3,11 +3,11 @@ import sqlite3
 from models.product import ProductModel
 
 class ProductStorage:
-    def __init__(self, path: str):
-        self.conn = sqlite3.connect(path, check_same_thread=False)
-        self.create()
+    def __init__(self):
+        self.conn = sqlite3.connect("products-database.sqlite", check_same_thread=False)
+        self.__create()
 
-    def create(self):
+    def __create(self):
         if self.conn is None:
             logging.error(f"[PRODUCT-STORAGE] Connection error!")
 

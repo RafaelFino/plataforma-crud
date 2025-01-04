@@ -63,7 +63,7 @@ def get():
     try:
         ret = service.get()
         if len(ret) == 0:
-            return makeResponse("All products", { 'count': len(ret) }), HTTPStatus.NOT_FOUND
+            return makeResponse("All products", { 'count': len(ret) }), HTTPStatus.NO_CONTENT
         
         data = []
         for p in ret:
@@ -81,7 +81,8 @@ def getById(id):
     try:
         ret = service.getById(id)
         if ret is None:
-            return makeResponse(f"Product id {id}", { 'id': id }), HTTPStatus.NOT_FOUND
+            logging.debug(f"[PRODUCT-API] Product not found ID:{id}")
+            return makeResponse(f"Product not found", { "id": id }), HTTPStatus.NO_CONTENT
 
         return makeResponse(f"Product id {id}", { "data": ret.toDict() }), HTTPStatus.OK
     except Exception as error: 
