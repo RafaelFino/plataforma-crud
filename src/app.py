@@ -13,7 +13,13 @@ print("Starting...")
 
 app = Flask(__name__)
 service = ProductService()
-logging.basicConfig(level=logging.DEBUG, format="%(asctime)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.DEBUG, 
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    filename="logs/products-service.log",
+    filemode='a',
+    datefmt='%H:%M:%S',
+)
 
 def makeResponse(msg: str, args: dict = {}):
     ret = {
